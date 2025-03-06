@@ -329,7 +329,7 @@ questions_db = {
 
 def reset_attempts(username):
     stats=load_stats()
-    stats[username]["daily_attempts"]=0
+    stats[username]["daily_attempts"] = {"date": today, "count": 0}
     save_stats(stats)
     
 def check_attempts_limit(username):
