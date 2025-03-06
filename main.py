@@ -8,9 +8,12 @@ import random
 import datetime
 
 
-TOKEN = "8121958160:AAF0uyisjTD6BjBd8P6HndtZ0vtRRrZ3Cl0"
+TOKEN = "8121958160:AAF0uyisjTD6BjBd8P6HndtZ0vtRRrZ3Cl0" #Токен
 bot = telebot.TeleBot(TOKEN, parse_mode="HTML")
-QUESTION_LIMIT = 15
+QUESTION_LIMIT = 15 #Лимит вопросов в викторине
+STATS_FILE = "stats.json" #Файл статистики
+ATTEMPT_LIMIT = 10  # Максимальное количество викторин в день
+user_progress = {}
 
 
 questions_db = {
@@ -323,13 +326,10 @@ questions_db = {
 ]
     }
 }
-user_progress = {}
-STATS_FILE = "stats.json"
 
-
-
-ATTEMPT_LIMIT = 10  # Максимальное количество викторин в день
-
+def reset_attempts(username):
+    stats=load_stats()
+    stats[username]["daily_attempts"]=0
 
 def check_attempts_limit(username):
     """Проверяет, сколько викторин прошел пользователь за день."""
@@ -928,6 +928,7 @@ def checkout_process(pre_checkout_query):
 def payment_success(message):
     chat_id = message.chat.id
     bot.send_message(chat_id, "✅ Спасибо за поддержку! Ваш платеж успешно прошел.")
+    reset_attempts(message.from_uesr.username)
     markup=InlineKeyboardMarkup()
     main_button=InlineKeyboardButton('На главную',callback_data='back_to_main')
     markup.add(main_button)
