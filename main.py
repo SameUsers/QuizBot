@@ -330,7 +330,8 @@ questions_db = {
 def reset_attempts(username):
     stats=load_stats()
     stats[username]["daily_attempts"]=0
-
+    save_stats(stats)
+    
 def check_attempts_limit(username):
     """Проверяет, сколько викторин прошел пользователь за день."""
     stats = load_stats()
