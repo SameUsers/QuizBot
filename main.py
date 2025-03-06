@@ -928,7 +928,7 @@ def checkout_process(pre_checkout_query):
 def payment_success(message):
     chat_id = message.chat.id
     bot.send_message(chat_id, "✅ Спасибо за поддержку! Ваш платеж успешно прошел.")
-    reset_attempts(message.from_uesr.username)
+    reset_attempts(message.from_user.username)
     markup=InlineKeyboardMarkup()
     main_button=InlineKeyboardButton('На главную',callback_data='back_to_main')
     markup.add(main_button)
