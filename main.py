@@ -14,7 +14,10 @@ QUESTION_LIMIT = 15 #Лимит вопросов в викторине
 STATS_FILE = "stats.json" #Файл статистики
 ATTEMPT_LIMIT = 10  # Максимальное количество викторин в день
 user_progress = {}
-
+CHECK_SUBSCRIPTION = True
+CHANNELS = {
+    "@all_newschanel": "https://t.me/all_newschanel",
+}
 
 questions_db = {
     "🔬Образование/Наука": {
@@ -564,16 +567,22 @@ def start_quiz(call):
 
     CHANNEL_USERNAME="@all_newschanel"
 
-    # Проверяем, подписан ли пользователь
-    if not check_subscription(chat_id, CHANNEL_USERNAME):
+    # Проверка подписки
+    if CHECK_SUBSCRIPTION and not check_subscription(chat_id):
         markup = InlineKeyboardMarkup()
-        subscribe_button = InlineKeyboardButton("🔔 Подписаться", url=f"https://t.me/{CHANNEL_USERNAME.lstrip('@')}")
+
+        # Добавляем кнопки подписки на все каналы
+        for channel_name, channel_link in CHANNELS.items():
+            markup.row(InlineKeyboardButton(f"🔔 Подписаться ({channel_name})", url=channel_link))
+
         check_button = InlineKeyboardButton("✅ Я подписался", callback_data="check_subscription")
-        markup.row(subscribe_button)
         markup.row(check_button)
 
-        bot.send_message(chat_id, "🔔 Для участия в викторине подпишитесь на наш канал!", reply_markup=markup)
+        bot.send_message(chat_id, "🔔 Для участия в викторине подпишитесь на ВСЕ наши каналы!", reply_markup=markup)
         return
+
+    bot.send_message(chat_id, "🏠 Добро пожаловать в викторину!")
+    
 
     # Проверяем, не превышен ли лимит прохождений за день
     if not check_attempts_limit(username):
@@ -606,27 +615,33 @@ def start_quiz(call):
 
 
 # Функция проверки подписки
-def check_subscription(user_id, channel_username):
+def check_subscription(user_id):
+    if not CHECK_SUBSCRIPTION:  # Если проверка выключена
+        return True
+
     try:
-        chat_member = bot.get_chat_member(channel_username, user_id)
-        return chat_member.status in ["member", "administrator", "creator"]
+        for channel in CHANNELS.keys():
+            chat_member = bot.get_chat_member(channel, user_id)
+            if chat_member.status not in ["member", "administrator", "creator"]:
+                return False  # Если не подписан хотя бы на один канал
     except Exception as e:
         print(f"Ошибка при проверке подписки: {e}")
-        return False
+        return False  # Если ошибка, считаем что не подписан
+
+    return True  # Подписан на все каналы
 
 
+# Обработчик кнопки "Я подписался"
 # Обработчик кнопки "Я подписался"
 @bot.callback_query_handler(func=lambda call: call.data == "check_subscription")
 def check_subscription_callback(call):
     chat_id = call.message.chat.id
-    CHANNEL_USERNAME ="@all_newschanel"
 
-    if check_subscription(chat_id, CHANNEL_USERNAME):
+    if check_subscription(chat_id):
         bot.send_message(chat_id, "✅ Спасибо за подписку! Теперь вы можете участвовать в викторине.")
         bot.delete_message(chat_id, call.message.message_id)  # Удаляем сообщение с кнопками
     else:
-        bot.answer_callback_query(call.id, "❌ Вы ещё не подписались! Подпишитесь и попробуйте снова.")
-
+        bot.answer_callback_query(call.id, "❌ Вы ещё не подписались на все каналы! Подпишитесь и попробуйте снова.")
 
 
 def send_question(chat_id, mode, subcategory, username):
