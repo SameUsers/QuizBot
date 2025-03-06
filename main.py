@@ -374,9 +374,14 @@ def update_attempts(username):
     save_stats(stats)
     
 def reset_attempts(username):
-    stats=load_stats()
-    stats[username]["daily_attempts"] = {"date": today, "count": 0}
-    save_stats(stats)
+    """Сбрасывает счетчик попыток пользователя на сегодня."""
+    stats = load_stats()
+    today = datetime.date.today().isoformat()  # Добавляем определение переменной today
+    
+    if username in stats:
+        stats[username]["daily_attempts"] = {"date": today, "count": 0}
+        save_stats(stats)
+
     
 def load_stats():
     """Загружает статистику из JSON."""
