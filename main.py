@@ -327,10 +327,7 @@ questions_db = {
     }
 }
 
-def reset_attempts(username):
-    stats=load_stats()
-    stats[username]["daily_attempts"] = {"date": today, "count": 0}
-    save_stats(stats)
+
     
 def check_attempts_limit(username):
     """Проверяет, сколько викторин прошел пользователь за день."""
@@ -375,7 +372,12 @@ def update_attempts(username):
     # Увеличиваем счетчик попыток
     stats[username]["daily_attempts"]["count"] += 1
     save_stats(stats)
-
+    
+def reset_attempts(username):
+    stats=load_stats()
+    stats[username]["daily_attempts"] = {"date": today, "count": 0}
+    save_stats(stats)
+    
 def load_stats():
     """Загружает статистику из JSON."""
     if os.path.exists(STATS_FILE):
@@ -928,8 +930,8 @@ def checkout_process(pre_checkout_query):
 @bot.message_handler(content_types=["successful_payment"])
 def payment_success(message):
     chat_id = message.chat.id
-    bot.send_message(chat_id, "✅ Спасибо за поддержку! Ваш платеж успешно прошел.")
     reset_attempts(message.from_user.username)
+    bot.send_message(chat_id, "✅ Спасибо за поддержку! Ваш платеж успешно прошел.")
     markup=InlineKeyboardMarkup()
     main_button=InlineKeyboardButton('На главную',callback_data='back_to_main')
     markup.add(main_button)
