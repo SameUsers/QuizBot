@@ -10,14 +10,17 @@ import datetime
 
 TOKEN = "8121958160:AAF0uyisjTD6BjBd8P6HndtZ0vtRRrZ3Cl0" #Токен
 bot = telebot.TeleBot(TOKEN, parse_mode="HTML")
+
+
 QUESTION_LIMIT = 15 #Лимит вопросов в викторине
 STATS_FILE = "stats.json" #Файл статистики
 ATTEMPT_LIMIT = 10  # Максимальное количество викторин в день
 user_progress = {}
-CHECK_SUBSCRIPTION = True
+CHECK_SUBSCRIPTION = True #Включение или выключение проверки подписки на каналы
 CHANNELS = {
     "@all_newschanel": "https://t.me/all_newschanel",
-}
+} #Список каналов
+
 
 questions_db = {
     "🔬Образование/Наука": {
